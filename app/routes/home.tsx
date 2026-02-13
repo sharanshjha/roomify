@@ -2,6 +2,19 @@ import Navbar from "components/Navbar";
 import type { Route } from "./+types/home";
 import { ArrowRight, ArrowUpRight, Clock, Layers } from "lucide-react";
 import Button from "components/ui/Button";
+import Upload from "components/Upload";
+import { useNavigate } from "react-router";
+import {
+  UPLOAD_ACCEPTED_MIME_TYPES,
+  UPLOAD_ACCEPT_ATTR,
+  UPLOAD_MAX_SIZE_MB,
+} from "lib/constants";
+
+const UPLOAD_RULES = {
+  maxSizeMB: UPLOAD_MAX_SIZE_MB,
+  acceptedMimeTypes: UPLOAD_ACCEPTED_MIME_TYPES,
+  accept: UPLOAD_ACCEPT_ATTR,
+};
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "New React Router App" },
@@ -10,6 +23,12 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
+  const navigate = useNavigate();
+  const handleUploadComplete = async (base64Image:string)=>{
+    const newId = Date.now().toString();
+    navigate(`/visualizer/${newId}`);
+    return true;
+  }
   return (
     <div className="home">
       <Navbar></Navbar>
@@ -39,9 +58,14 @@ export default function Home() {
               <Layers className="icon"/>
             </div>
             <h3>Upload your floor plan</h3>
-            <p>Supports JPEG,PNG formats upto 10MB</p>
+            <p>Supports JPEG/PNG formats up to {UPLOAD_RULES.maxSizeMB}MB</p>
           </div>
-          <p>Upload images</p>
+          <Upload
+            maxSizeMB={UPLOAD_RULES.maxSizeMB}
+            acceptedMimeTypes={UPLOAD_RULES.acceptedMimeTypes}
+            accept={UPLOAD_RULES.accept}
+            onComplete={handleUploadComplete}
+          />
         </div>
 
       </div>
