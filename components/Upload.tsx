@@ -5,16 +5,28 @@ import {
     PROGRESS_INTERVAL_MS,
     PROGRESS_STEP,
     REDIRECT_DELAY_MS,
+    UPLOAD_ACCEPT_ATTR,
+    UPLOAD_ACCEPTED_MIME_TYPES,
+    UPLOAD_MAX_SIZE_MB,
 } from "lib/constants";
 
 type UploadProps = {
+    maxSizeMB?: number;
+    acceptedMimeTypes?: readonly string[];
+    accept?: string;
     onComplete?: (base64Data: string) => void;
 };
 
-const Upload = ({ onComplete }: UploadProps) => {
+const Upload = ({
+    maxSizeMB = UPLOAD_MAX_SIZE_MB,
+    acceptedMimeTypes = UPLOAD_ACCEPTED_MIME_TYPES,
+    accept = UPLOAD_ACCEPT_ATTR,
+    onComplete,
+}: UploadProps) => {
     const [file, setFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [error, setError] = useState<string | null>(null);
     const { isSignedIn } = useOutletContext<AuthContext>();
     const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -31,8 +43,29 @@ const Upload = ({ onComplete }: UploadProps) => {
         };
     }, []);
 
+    const validateFile = (selectedFile: File) => {
+        const maxSizeBytes = maxSizeMB * 1024 * 1024;
+        const isAllowedType = acceptedMimeTypes.includes(selectedFile.type);
+
+        if (!isAllowedType) {
+            setError("Only JPEG and PNG files are allowed.");
+            return false;
+        }
+
+        if (selectedFile.size > maxSizeBytes) {
+            setError(`File is too large. Max allowed size is ${maxSizeMB}MB.`);
+            return false;
+        }
+
+        setError(null);
+        return true;
+    };
+
     const processFile = (selectedFile: File) => {
         if (!isSignedIn) {
+            return;
+        }
+        if (!validateFile(selectedFile)) {
             return;
         }
 
@@ -74,6 +107,7 @@ const Upload = ({ onComplete }: UploadProps) => {
         }
 
         processFile(selectedFile);
+        event.currentTarget.value = "";
     };
 
     const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -120,7 +154,7 @@ const Upload = ({ onComplete }: UploadProps) => {
                     <input
                         type="file"
                         className="drop-input"
-                        accept=".jpeg,.jpg,.png"
+                        accept={accept}
                         disabled={!isSignedIn}
                         onChange={handleFileChange}
                     />
@@ -135,7 +169,8 @@ const Upload = ({ onComplete }: UploadProps) => {
                                 )
                             }
                         </p>
-                        <p className="help" >Maximum file size 50 MB</p>
+                        <p className="help" >Maximum file size {maxSizeMB}MB</p>
+                        {error ? <p className="help text-red-500">{error}</p> : null}
                     </div>
                     </div>
             ) : (
