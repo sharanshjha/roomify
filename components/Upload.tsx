@@ -1,6 +1,7 @@
 import { CheckCircle2, ImageIcon, UploadIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useOutletContext } from "react-router";
+import type { AuthContext } from "../type";
 import {
     PROGRESS_INTERVAL_MS,
     PROGRESS_STEP,
@@ -55,9 +56,17 @@ const Upload = ({
     const validateFile = (selectedFile: File) => {
         const maxSizeBytes = maxSizeMB * 1024 * 1024;
         const isAllowedType = acceptedMimeTypes.includes(selectedFile.type);
+        const mimeLabelMap: Record<string, string> = {
+            "image/jpeg": "JPEG",
+            "image/png": "PNG",
+            "image/webp": "WEBP",
+        };
+        const allowedTypesLabel = acceptedMimeTypes
+            .map((mimeType) => mimeLabelMap[mimeType] ?? mimeType)
+            .join(", ");
 
         if (!isAllowedType) {
-            setError("Only JPEG and PNG files are allowed.");
+            setError(`Unsupported file type. Allowed types: ${allowedTypesLabel}.`);
             return false;
         }
 
