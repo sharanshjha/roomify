@@ -1,4 +1,7 @@
-export const PUTER_WORKER_URL = import.meta.env.VITE_PUTER_WORKER_URL || "";
+export const PUTER_WORKER_URL = import.meta.env.VITE_PUTER_WORKER_URL ?? "";
+if (!PUTER_WORKER_URL) {
+    throw new Error("VITE_PUTER_WORKER_URL is required");
+}
 
 // Storage Paths
 export const STORAGE_PATHS = {

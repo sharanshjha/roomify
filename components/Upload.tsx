@@ -29,6 +29,7 @@ const Upload = ({
     const [error, setError] = useState<string | null>(null);
     const { isSignedIn } = useOutletContext<AuthContext>();
     const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const clearProgressInterval = () => {
         if (progressIntervalRef.current) {
@@ -37,9 +38,17 @@ const Upload = ({
         }
     };
 
+    const clearRedirectTimeout = () => {
+        if (redirectTimeoutRef.current) {
+            clearTimeout(redirectTimeoutRef.current);
+            redirectTimeoutRef.current = null;
+        }
+    };
+
     useEffect(() => {
         return () => {
             clearProgressInterval();
+            clearRedirectTimeout();
         };
     }, []);
 
@@ -69,13 +78,23 @@ const Upload = ({
             return;
         }
 
+        const failRead = (message: string) => {
+            clearProgressInterval();
+            clearRedirectTimeout();
+            setFile(null);
+            setProgress(0);
+            setError(message);
+        };
+
         setFile(selectedFile);
         setProgress(0);
+        setError(null);
 
         const reader = new FileReader();
         reader.onload = () => {
             const result = reader.result;
             if (typeof result !== "string") {
+                failRead("Unable to read file data. Please try another image.");
                 return;
             }
 
@@ -85,13 +104,20 @@ const Upload = ({
                     const next = Math.min(prev + PROGRESS_STEP, 100);
                     if (next === 100) {
                         clearProgressInterval();
-                        setTimeout(() => {
+                        clearRedirectTimeout();
+                        redirectTimeoutRef.current = setTimeout(() => {
                             onComplete?.(result);
                         }, REDIRECT_DELAY_MS);
                     }
                     return next;
                 });
             }, PROGRESS_INTERVAL_MS);
+        };
+        reader.onerror = () => {
+            failRead("Failed to read file. Please try again.");
+        };
+        reader.onabort = () => {
+            failRead("File read was canceled. Please try again.");
         };
         reader.readAsDataURL(selectedFile);
     };
