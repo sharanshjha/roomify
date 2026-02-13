@@ -1,88 +1,100 @@
-# Welcome to React Router!
+# Roomify
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Roomify is a modern React Router + TypeScript web app scaffolded for building a polished product experience with authentication-ready UI.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## Highlights
 
-## Features
+- React Router v7 app architecture
+- TypeScript-first codebase
+- Tailwind CSS v4 styling with custom design tokens
+- Reusable UI primitives (for example `Button` with variant/size modifiers)
+- Puter authentication integration (`signIn`, `signOut`, `getCurrentUser`)
+- Dockerfile included for containerized deployment
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+## Tech Stack
+
+- React 19
+- React Router 7
+- TypeScript 5
+- Tailwind CSS 4
+- Vite 7
+- `@heyputer/puter.js`
+- `lucide-react`
+
+## Project Structure
+
+```text
+app/
+  root.tsx              # App shell + auth context wiring
+  routes/home.tsx       # Home route
+  app.css               # Tailwind + component styles
+components/
+  Navbar.tsx            # Header + auth actions
+  ui/Button.tsx         # Reusable button component (BEM-style classes)
+lib/
+  puter.action.ts       # Puter auth helpers
+```
 
 ## Getting Started
 
-### Installation
-
-Install the dependencies:
+### 1. Install dependencies
 
 ```bash
 npm install
 ```
 
-### Development
-
-Start the development server with HMR:
+### 2. Run in development
 
 ```bash
 npm run dev
 ```
 
-Your application will be available at `http://localhost:5173`.
+App runs locally on the port shown by Vite/React Router dev server.
 
-## Building for Production
+### 3. Type-check
 
-Create a production build:
+```bash
+npm run typecheck
+```
+
+### 4. Build for production
 
 ```bash
 npm run build
 ```
 
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
+### 5. Run production build
 
 ```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
+npm run start
 ```
 
-The containerized application can be deployed to any platform that supports Docker, including:
+## Authentication Notes
 
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
+Roomify uses Puter SDK calls from `lib/puter.action.ts`:
 
-### DIY Deployment
+- `signIn()`
+- `signOut()`
+- `getCurrentUser()`
 
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
+`app/root.tsx` refreshes auth state on load and exposes auth actions/state via outlet context for route components.
 
-Make sure to deploy the output of `npm run build`
+## Docker
 
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
+Build and run:
+
+```bash
+docker build -t roomify .
+docker run -p 3000:3000 roomify
 ```
 
-## Styling
+## Scripts
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+- `npm run dev` - Start development server
+- `npm run build` - Build server/client output
+- `npm run start` - Serve production build
+- `npm run typecheck` - Generate route types and run TypeScript checks
 
----
+## Status
 
-Built with ❤️ using React Router.
-"# roomify" 
+This repo currently includes the base app shell, auth-aware navbar, and UI foundations. Extend routes/components to add your full Roomify product flow.
